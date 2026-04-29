@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<title>Ethanol</title>
+<style>
+:root {
+  --accent: #f59e0b;
+  --bg: #0a0a0a;
+  --card: #141414;
+  --border: rgba(255, 255, 255, 0.08);
+  --text: #e8e8e8;
+  --text-dim: rgba(255, 255, 255, 0.45);
+  --text-muted: rgba(255, 255, 255, 0.25);
+  --surface: rgba(255, 255, 255, 0.06);
+  --surface-hover: rgba(255, 255, 255, 0.1);
+  --radius: 0.75rem;
+  --space: clamp(1rem, 3vw, 1.5rem);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif; margin: 0 auto; max-width: 480px; min-height: 100dvh; padding: var(--space); }
+h1 { font-size: 1.25rem; font-weight: 600; letter-spacing: -0.03em; margin-bottom: var(--space); text-align: center; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 1rem; margin-bottom: var(--space); padding: var(--space); }
+.card h2 { color: var(--text-dim); font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.05em; margin-bottom: 0.75rem; text-transform: uppercase; }
+.drink-buttons { display: grid; gap: 0.5rem; grid-template-columns: 1fr 1fr 1fr; margin-top: 0.75rem; }
+.drink-btn { background: var(--surface); border: none; border-radius: var(--radius); color: var(--text); cursor: pointer; font-size: 1rem; font-weight: 500; min-height: 3.5rem; padding: 0.75rem; transition: background 0.2s; }
+.drink-btn:active { background: var(--surface-hover); }
+.drink-btn.beer { border-bottom: 3px solid #f59e0b; }
+.drink-btn.wine { border-bottom: 3px solid #a855f7; }
+.drink-btn.cocktail { border-bottom: 3px solid #06b6d4; }
+.input-row { align-items: center; display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+.input-row label { color: var(--text-dim); font-size: 0.75rem; min-width: 2.25rem; }
+.input-row input { background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; color: var(--text); font-size: 0.875rem; padding: 0.5rem 0.75rem; width: 100%; }
+.stats-grid { display: grid; gap: 0.5rem; grid-template-columns: 1fr 1fr; }
+.stat { background: var(--surface); border-radius: 0.5rem; padding: 0.75rem; }
+.stat-value { font-size: 1.25rem; font-weight: 600; letter-spacing: -0.02em; }
+.stat-label { color: var(--text-dim); font-size: 0.6875rem; margin-top: 0.25rem; }
+.stat.full { grid-column: 1 / -1; }
+.status { border-radius: 0.5rem; font-size: 0.8125rem; font-weight: 500; margin-top: 0.75rem; padding: 0.5rem 0.75rem; text-align: center; }
+.status.under { background: rgba(59, 130, 246, 0.15); color: #93c5fd; }
+.status.on-track { background: rgba(34, 197, 94, 0.15); color: #86efac; }
+.status.over { background: rgba(239, 68, 68, 0.15); color: #fca5a5; }
+.actions { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+.actions button { background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; color: var(--text); cursor: pointer; flex: 1; font-size: 0.8125rem; padding: 0.5rem; transition: background 0.2s; }
+.actions button:active { background: var(--surface-hover); }
+.cocktail-options { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+.cocktail-options button { background: var(--surface); border: 1px solid var(--border); border-radius: 0.5rem; color: var(--text); cursor: pointer; flex: 1; font-size: 0.8125rem; padding: 0.75rem; transition: background 0.2s; }
+.cocktail-options button:active { background: var(--surface-hover); }
+.cocktail-options span { color: var(--text-muted); font-size: 0.6875rem; }
+.history-item { align-items: center; border-bottom: 1px solid var(--border); display: flex; gap: 0.5rem; padding: 0.5rem 0; }
+.history-item:last-child { border-bottom: none; }
+.history-info { flex: 1; font-size: 0.8125rem; }
+.history-oz { color: var(--accent); font-size: 0.8125rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.history-delete { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.25rem; padding: 0.25rem 0.5rem; transition: color 0.2s; }
+.history-delete:active { color: #f87171; }
+.date-header { color: var(--text-muted); font-size: 0.6875rem; font-weight: 500; margin-top: 0.75rem; padding-bottom: 0.25rem; }
+.date-header:first-child { margin-top: 0; }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+<h1>Ethanol</h1>
+
+<section class="card">
+<h2>Add Drink</h2>
+<div class="input-row">
+<label>Date</label>
+<input type="date" id="drink-date">
+</div>
+<div class="drink-buttons">
+<button class="drink-btn beer" onclick="addBeer()">Beer</button>
+<button class="drink-btn wine" onclick="addWine()">Wine</button>
+<button class="drink-btn cocktail" onclick="toggleCocktail()">Cocktail</button>
+</div>
+<div id="cocktail-options" class="cocktail-options hidden">
+<button onclick="addCocktail('standard')">Standard<br><span>1.5 oz / 40%</span></button>
+<button onclick="addCocktail('heavy')">Heavy<br><span>2 oz / 40%</span></button>
+</div>
+<div class="input-row">
+<label>Oz</label>
+<input type="number" id="drink-oz" step="0.5" min="0">
+<label>ABV</label>
+<input type="number" id="drink-abv" step="0.5" min="0" max="100">
+<label>%</label>
+</div>
+<div class="input-row">
+<label>Note</label>
+<input type="text" id="drink-note" placeholder="Optional label">
+</div>
+<div class="actions">
+<button onclick="undoLast()">Undo Last</button>
+<button onclick="if(confirm('Reset all data and re-seed?')){localStorage.removeItem(KEY);seed()}">Reset</button>
+</div>
+</section>
+
+<section class="card">
+<h2>Dashboard</h2>
+<div class="stats-grid">
+<div class="stat"><div class="stat-value" id="today-oz">0</div><div class="stat-label">Today (oz)</div></div>
+<div class="stat"><div class="stat-value" id="week-oz">0</div><div class="stat-label">This Week (oz)</div></div>
+<div class="stat"><div class="stat-value" id="month-oz">0</div><div class="stat-label">This Month (oz)</div></div>
+<div class="stat"><div class="stat-value" id="ytd-oz">0</div><div class="stat-label">Year to Date (oz)</div></div>
+<div class="stat"><div class="stat-value" id="weekly-avg">0</div><div class="stat-label">Weekly Avg (oz)</div></div>
+<div class="stat"><div class="stat-value" id="projected-oz">0</div><div class="stat-label">Projected Annual (oz)</div></div>
+<div class="stat"><div class="stat-value" id="projected-drinks">0</div><div class="stat-label">Projected Standard Drinks</div></div>
+<div class="stat"><div class="stat-value" id="projected-liters">0</div><div class="stat-label">Projected Liters Ethanol</div></div>
+</div>
+<div id="status" class="status hidden"></div>
+</section>
+
+<section class="card">
+<h2>History</h2>
+<div id="history"></div>
+</section>
+
+<script>
+const $ = id => document.getElementById(id);
+const KEY = 'ethanol_drinks';
+const dateInput = $('drink-date');
+const ozInput = $('drink-oz');
+const abvInput = $('drink-abv');
+const noteInput = $('drink-note');
+const defaults = { beer: { abv: 9, oz: 16 }, wine: { abv: 12, oz: 5 } };
+
+dateInput.value = new Date().toISOString().split('T')[0];
+
+const getDrinks = () => JSON.parse(localStorage.getItem(KEY) || '[]');
+const saveDrinks = drinks => { localStorage.setItem(KEY, JSON.stringify(drinks)); render(); };
+const monthWeight = m => (m === 0 || m === 9) ? 0.1 : 1;
+
+function seed() {
+  if (getDrinks().length) return;
+  let id = 1700000000000;
+  const e = (date, type, oz, abv, note) => ({ id: id++, date, type, oz, abv, ethanol: +(oz * abv / 100).toFixed(3), ...(note && { note }) });
+  const days = [
+    ...['2026-01-24', '2026-01-25'].flatMap(d => [e(d, 'Beer', 12, 7, 'Disneyland'), e(d, 'Beer', 12, 7)]),
+    ...['2026-02-02', '2026-02-03', '2026-02-04', '2026-02-05'].flatMap(d => [e(d, 'Beer', 12, 8, 'DC work trip'), e(d, 'Beer', 12, 8), e(d, 'Cocktail (standard)', 1.5, 40)]),
+    ...['2026-02-09', '2026-02-12', '2026-02-14', '2026-02-18', '2026-02-21', '2026-02-24', '2026-02-27'].flatMap(d => [e(d, 'Beer', 12, 8), e(d, 'Beer', 12, 8)]),
+  ];
+  saveDrinks(days);
+}
+
+function addBeer() {
+  const oz = parseFloat(ozInput.value) || defaults.beer.oz;
+  const abv = parseFloat(abvInput.value) || defaults.beer.abv;
+  if (ozInput.value) defaults.beer.oz = oz;
+  if (abvInput.value) defaults.beer.abv = abv;
+  addDrink('Beer', oz, abv);
+}
+
+function addWine() {
+  const oz = parseFloat(ozInput.value) || defaults.wine.oz;
+  const abv = parseFloat(abvInput.value) || defaults.wine.abv;
+  if (ozInput.value) defaults.wine.oz = oz;
+  if (abvInput.value) defaults.wine.abv = abv;
+  addDrink('Wine', oz, abv);
+}
+
+function toggleCocktail() { $('cocktail-options').classList.toggle('hidden'); }
+
+function addCocktail(type) {
+  addDrink(`Cocktail (${type})`, type === 'heavy' ? 2 : 1.5, 40);
+  $('cocktail-options').classList.add('hidden');
+}
+
+function addDrink(type, oz, abv) {
+  const drinks = getDrinks();
+  const entry = { id: Date.now(), date: dateInput.value, type, oz, abv, ethanol: +(oz * abv / 100).toFixed(3) };
+  if (noteInput.value) entry.note = noteInput.value;
+  drinks.push(entry);
+  saveDrinks(drinks);
+  ozInput.value = '';
+  abvInput.value = '';
+}
+
+function undoLast() {
+  const drinks = getDrinks();
+  if (drinks.length) { drinks.pop(); saveDrinks(drinks); }
+}
+
+function deleteDrink(id) { saveDrinks(getDrinks().filter(d => d.id !== id)); }
+
+function render() {
+  const drinks = getDrinks();
+  const now = new Date();
+  const today = now.toISOString().split('T')[0];
+  const year = now.getFullYear();
+  const startOfYear = new Date(year, 0, 1);
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - now.getDay());
+  const weekStr = startOfWeek.toISOString().split('T')[0];
+  const monthStr = today.slice(0, 7);
+
+  let todayOz = 0, weekOz = 0, monthOz = 0, ytdOz = 0;
+  const weeklyTotals = {};
+
+  drinks.forEach(d => {
+    if (d.date === today) todayOz += d.ethanol;
+    if (d.date >= weekStr) weekOz += d.ethanol;
+    if (d.date.startsWith(monthStr)) monthOz += d.ethanol;
+    if (d.date.startsWith(String(year))) ytdOz += d.ethanol;
+    const dDate = new Date(d.date + 'T00:00:00');
+    const wStart = new Date(dDate);
+    wStart.setDate(dDate.getDate() - dDate.getDay());
+    weeklyTotals[wStart.toISOString().split('T')[0]] = (weeklyTotals[wStart.toISOString().split('T')[0]] || 0) + d.ethanol;
+  });
+
+  const activeWeeks = Object.keys(weeklyTotals).length;
+  const weeklyAvg = activeWeeks ? ytdOz / activeWeeks : 0;
+
+  const dayOfYear = Math.floor((now - startOfYear) / 86400000) + 1;
+  let elapsedWeighted = 0;
+  for (let i = 0; i < dayOfYear; i++) elapsedWeighted += monthWeight(new Date(year, 0, 1 + i).getMonth());
+  const dailyPace = elapsedWeighted > 0 ? ytdOz / elapsedWeighted : 0;
+  const daysInYear = ((year % 4 === 0 && year % 100 !== 0) || year % 400 === 0) ? 366 : 365;
+  let remainingWeighted = 0;
+  for (let i = dayOfYear; i < daysInYear; i++) remainingWeighted += monthWeight(new Date(year, 0, 1 + i).getMonth());
+  const projectedOz = ytdOz + dailyPace * remainingWeighted;
+
+  $('today-oz').textContent = todayOz.toFixed(2);
+  $('week-oz').textContent = weekOz.toFixed(2);
+  $('month-oz').textContent = monthOz.toFixed(2);
+  $('ytd-oz').textContent = ytdOz.toFixed(2);
+  $('weekly-avg').textContent = weeklyAvg.toFixed(2);
+  $('projected-oz').textContent = projectedOz.toFixed(1);
+  $('projected-drinks').textContent = (projectedOz / 0.6).toFixed(0);
+  $('projected-liters').textContent = (projectedOz * 0.0295735).toFixed(2);
+
+  const status = $('status');
+  if (!activeWeeks) { status.classList.add('hidden'); }
+  else {
+    status.classList.remove('hidden');
+    if (weeklyAvg < 3) { status.className = 'status under'; status.textContent = 'Under band — below 3 oz/week'; }
+    else if (weeklyAvg <= 4) { status.className = 'status on-track'; status.textContent = 'On track — 3–4 oz/week'; }
+    else { status.className = 'status over'; status.textContent = 'Over band — above 4 oz/week'; }
+  }
+
+  const sorted = [...drinks].sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
+  const hist = $('history');
+  hist.replaceChildren();
+  let lastDate = '';
+  sorted.forEach(d => {
+    if (d.date !== lastDate) {
+      lastDate = d.date;
+      const note = sorted.find(x => x.date === d.date && x.note)?.note;
+      const header = document.createElement('div');
+      header.className = 'date-header';
+      header.textContent = new Date(d.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) + (note ? ` — ${note}` : '');
+      hist.appendChild(header);
+    }
+    const item = document.createElement('div');
+    item.className = 'history-item';
+    const info = document.createElement('div');
+    info.className = 'history-info';
+    info.textContent = `${d.type} — ${d.oz} oz @ ${d.abv}%`;
+    const oz = document.createElement('div');
+    oz.className = 'history-oz';
+    oz.textContent = d.ethanol.toFixed(2);
+    const del = document.createElement('button');
+    del.className = 'history-delete';
+    del.textContent = '×';
+    del.onclick = () => deleteDrink(d.id);
+    item.appendChild(info);
+    item.appendChild(oz);
+    item.appendChild(del);
+    hist.appendChild(item);
+  });
+}
+
+seed();
+render();
+</script>
+</body>
+</html>
