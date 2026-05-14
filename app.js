@@ -7,6 +7,7 @@ let source = 'local'
 let fixtureData = null
 let chart = null
 let currentRange = '30d'
+let soberOctober = false
 
 const getDrinks = () => {
   if (source === 'fixtures' && fixtureData) return fixtureData
@@ -213,8 +214,9 @@ const render = () => {
   $('oz-60d').textContent = rangeOz(60).toFixed(1) + ' oz'
   $('oz-ytd').textContent = ytdOz.toFixed(1) + ' oz'
 
-  const dayOfYear = Math.floor((now - startOfYear) / 86400000) + 1
-  const daysInYear = ((year % 4 === 0 && year % 100 !== 0) || year % 400 === 0) ? 366 : 365
+  const soberDays = soberOctober ? 30 : 0
+  const dayOfYear = Math.floor((now - startOfYear) / 86400000) + 1 + soberDays
+  const daysInYear = (((year % 4 === 0 && year % 100 !== 0) || year % 400 === 0) ? 366 : 365) + soberDays
   const dailyAvg = dayOfYear > 0 ? ytdOz / dayOfYear : 0
   const projectedOz = dailyAvg * daysInYear
 
@@ -229,18 +231,19 @@ const render = () => {
   $('pace-oz').textContent = dailyAvg.toFixed(3)
   const pace = $('pace')
   const ps = $('pace-status')
-  if (dailyAvg < 0.5) { pace.style.background = 'var(--status-green)'; ps.textContent = 'under pace' }
-  else if (dailyAvg < 0.6) { pace.style.background = 'var(--status-yellow)'; ps.textContent = 'on pace' }
-  else { pace.style.background = 'var(--status-red)'; ps.textContent = 'over pace' }
+  pace.classList.remove('pace-green', 'pace-yellow', 'pace-red')
+  if (dailyAvg < 0.5) { pace.classList.add('pace-green'); ps.textContent = 'under pace' }
+  else if (dailyAvg < 0.6) { pace.classList.add('pace-yellow'); ps.textContent = 'on pace' }
+  else { pace.classList.add('pace-red'); ps.textContent = 'over pace' }
 
   const drinkTypes = [
     { label: 'beers', ethanol: 1.2 },
     { label: 'joeys', ethanol: 1 },
   ]
   const thresholds = [
-    { rate: 0.4, label: 'below target', color: 'var(--status-green)' },
-    { rate: 0.5, label: 'below pace', color: 'var(--status-yellow)' },
-    { rate: 0.6, label: 'below max', color: 'var(--status-red)' },
+    { rate: 0.4, label: 'below target', color: 'var(--status-green)', dot: 'dot-green' },
+    { rate: 0.5, label: 'below pace', color: 'var(--status-yellow)', dot: 'dot-yellow' },
+    { rate: 0.6, label: 'below max', color: 'var(--status-red)', dot: 'dot-red' },
   ]
   const outlook = $('outlook')
   outlook.replaceChildren()
@@ -266,8 +269,7 @@ const render = () => {
       const label = document.createElement('p')
       label.appendChild(document.createTextNode(t.label))
       const dot = document.createElement('span')
-      dot.className = 'outlook-dot'
-      dot.style.background = t.color
+      dot.className = `outlook-dot ${t.dot}`
       label.appendChild(dot)
       col.appendChild(label)
       const stats = document.createElement('div')
@@ -350,6 +352,38 @@ $('add-cocktail').addEventListener('click', () => addDrink('Cocktail', 2.5, 40))
 
 document.addEventListener('click', e => {
   if (!e.target.closest('#beer-bar') && !e.target.closest('#add-beer')) resetDrinkBar()
+})
+
+$('legend-toggle').addEventListener('click', () => {
+  const legend = $('legend')
+  const isHidden = legend.classList.toggle('hidden')
+  $('legend-toggle').textContent = isHidden ? 'Show legend' : 'Hide legend'
+})
+
+document.querySelectorAll('#legend [data-pace]').forEach(el => {
+  const i = parseInt(el.dataset.pace)
+  el.addEventListener('mouseenter', () => {
+    if (!chart) return
+    const ds = chart.data.datasets[i]
+    ds._origWidth = ds.borderWidth
+    ds._origColor = ds.borderColor
+    ds.borderWidth = 4
+    ds.borderColor = ds.borderColor.replace('80', 'ff')
+    chart.update('none')
+  })
+  el.addEventListener('mouseleave', () => {
+    if (!chart) return
+    const ds = chart.data.datasets[i]
+    ds.borderWidth = ds._origWidth
+    ds.borderColor = ds._origColor
+    chart.update('none')
+  })
+})
+
+$('sober-toggle').addEventListener('click', () => {
+  soberOctober = !soberOctober
+  $('sober-toggle').setAttribute('aria-checked', soberOctober)
+  render()
 })
 $('add-wine').addEventListener('click', () => addDrink('Wine', defaults.wine.oz, defaults.wine.abv))
 $('reset-btn').addEventListener('click', () => {
