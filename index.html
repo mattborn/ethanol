@@ -31,10 +31,10 @@
           <button class="button outline range-btn" data-range="7d">
             <span>7d</span><span class="range-oz" id="oz-7d">0</span>
           </button>
-          <button class="button outline range-btn active" data-range="30d">
+          <button class="button outline range-btn" data-range="30d">
             <span>30d</span><span class="range-oz" id="oz-30d">0</span>
           </button>
-          <button class="button outline range-btn" data-range="60d">
+          <button class="button outline range-btn active" data-range="60d">
             <span>60d</span><span class="range-oz" id="oz-60d">0</span>
           </button>
           <button class="button outline range-btn" data-range="ytd">
@@ -42,23 +42,38 @@
           </button>
         </div>
         <canvas id="chart"></canvas>
-        <span class="inline-links"><a class="button button-link" id="legend-toggle">Show legend</a></span>
+        <span class="inline-links"
+          ><a class="button button-link" id="legend-toggle"
+            >Show legend</a
+          ></span
+        >
         <div id="legend" class="hidden stack legend">
           <p data-pace="3">
-            <span class="outlook-dot dot-red"></span> Top red line is one
-            standard drink per day (0.6 oz ethanol) for 365 days — a 70%
-            reduction from my 2018–2023 annual average.
+            <span class="outlook-dot dot-red"></span>
+            <span
+              >Top red line is one standard drink per day (0.6 oz ethanol) for
+              365 days — a <span id="improvement-red">70%</span> improvement
+              from my 2018–2023 annual average.</span
+            >
           </p>
           <p data-pace="2">
-            <span class="outlook-dot dot-yellow"></span> Yellow line subtracts
-            January and October so it’s one drink per day for ~305 days — or
-            0.5oz per day.
+            <span class="outlook-dot dot-yellow"></span>
+            <span
+              >Yellow line subtracts January and October so it's one drink per
+              day for ~305 days — or 0.5oz per day.</span
+            >
           </p>
           <p data-pace="1">
-            <span class="outlook-dot dot-green"></span> Green line is 0.4 oz per
-            day or less than 250 drinks — 80%+ reduction on the year.
+            <span class="outlook-dot dot-green"></span>
+            <span
+              >Green line is 0.4 oz per day or less than 250 drinks — an
+              <span id="improvement-green">82%</span> improvement on the
+              year.</span
+            >
           </p>
         </div>
+
+        <div id="month-totals" class="month-totals"></div>
 
         <div class="row projection-row">
           <div id="pace" class="card pace-card ghost">
@@ -89,15 +104,26 @@
 
         <div id="outlook"></div>
 
-        <label id="sober-october">
-          <button
-            class="switch"
-            id="sober-toggle"
-            role="switch"
-            aria-checked="false"
-          ></button>
-          Sober October
-        </label>
+        <div class="row toggles">
+          <label id="exclude-birthday">
+            <button
+              class="switch"
+              id="birthday-toggle"
+              role="switch"
+              aria-checked="false"
+            ></button>
+            Exclude birthday
+          </label>
+          <label id="sober-october">
+            <button
+              class="switch"
+              id="sober-toggle"
+              role="switch"
+              aria-checked="false"
+            ></button>
+            Sober October
+          </label>
+        </div>
       </div>
 
       <div id="sidebar" class="stack">
@@ -139,7 +165,13 @@
             <label>Date</label><input type="date" id="edit-date" />
           </div>
           <div class="field">
-            <label>Type</label><input type="text" id="edit-type" />
+            <label>Type</label>
+            <select id="edit-type">
+              <option>Beer</option>
+              <option>Cocktail</option>
+              <option>Wine</option>
+              <option>Whiskey</option>
+            </select>
           </div>
           <div class="field">
             <label>Name</label
@@ -155,7 +187,7 @@
               ><input
                 type="number"
                 id="edit-abv"
-                step="0.5"
+                step="0.1"
                 min="0"
                 max="100"
               />
@@ -166,11 +198,13 @@
             ><input type="text" id="edit-occasion" placeholder="Optional" />
           </div>
         </div>
-        <div class="card-footer row">
-          <button class="button danger" id="edit-delete">Delete</button>
-          <span class="fill"></span>
-          <button class="button outline" id="edit-cancel">Cancel</button>
-          <button class="button primary" id="edit-save">Save</button>
+        <div class="card-footer">
+          <div class="row">
+            <button class="button danger" id="edit-delete">Delete</button>
+            <span class="fill"></span>
+            <button class="button outline" id="edit-cancel">Cancel</button>
+            <button class="button primary" id="edit-save">Save</button>
+          </div>
         </div>
       </div>
     </div>

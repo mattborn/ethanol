@@ -64,13 +64,20 @@ h2 { font-size: 1.25rem; }
 
 .date-header { color: var(--color-half); margin-top: 0.75rem; padding-bottom: 0.25rem; }
 .date-header:first-child { margin-top: 0; }
-.history-item { cursor: pointer; display: flex; gap: 0.5rem; padding: 0.5rem 0; }
+.history-item { cursor: pointer; display: flex; gap: 0.5rem; line-height: var(--app-copy-height); padding: 0.25rem 0; }
 .history-item:hover { background: var(--color-lighter); }
 .history-oz { color: var(--color-accent); font-variant-numeric: tabular-nums; }
 
 .modal { align-items: center; background: rgba(0, 0, 0, 0.5); display: flex; inset: 0; justify-content: center; padding: var(--space-clamp); position: fixed; z-index: 10; }
-.modal-content { max-width: 24rem; width: 100%; }
+.modal-content { background: var(--color-lightest); max-width: 24rem; width: 100%; }
 .danger { color: var(--status-red); }
+
+.month-totals { display: flex; gap: 0.25rem; overflow-x: auto; }
+.month-total { display: flex; font-variant-numeric: tabular-nums; gap: 0.25rem; padding: 0.25rem; white-space: nowrap; }
+.month-label { color: var(--color-half); }
+.month-oz { font-weight: 700; }
+
+.toggles { gap: 1rem; }
 
 #sidebar .tab-bar { align-self: flex-start; }
 

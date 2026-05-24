@@ -4,9 +4,11 @@ const KEY = 'ethanol_drinks'
 const defaults = { beer: { abv: 10, oz: 16 }, wine: { abv: 12, oz: 5 } }
 let editingId = null
 let source = 'local'
+let baselineAnnualOz = 0
 let fixtureData = null
 let chart = null
-let currentRange = '30d'
+let currentRange = '60d'
+let excludeBirthday = false
 let soberOctober = false
 
 const getDrinks = () => {
@@ -28,8 +30,14 @@ const loadFixtures = async () => {
   fixtureData = raw.map(d => ({ id: id++, ...d, ethanol: calcEthanol(d.oz, d.abv) }))
 }
 
+const loadBaseline = async () => {
+  const raw = await fetch('baseline.json').then(r => r.json())
+  const monthlyOz = raw.reduce((sum, d) => sum + calcEthanol(d.oz, d.abv), 0)
+  baselineAnnualOz = monthlyOz * 12
+}
+
 const init = async () => {
-  await loadFixtures()
+  await Promise.all([loadFixtures(), loadBaseline()])
   source = JSON.parse(localStorage.getItem(KEY) || '[]').length ? 'local' : 'fixtures'
   document.querySelectorAll('.source-tab').forEach(t => t.classList.toggle('active', t.dataset.source === source))
   $('reset-btn').classList.toggle('hidden', source !== 'local')
@@ -101,7 +109,7 @@ const renderChart = () => {
   }
 
   const dailyTotals = {}
-  drinks.filter(d => d.date.startsWith(String(year))).forEach(d => {
+  drinks.filter(d => d.date.startsWith(String(year)) && !(excludeBirthday && d.birthday)).forEach(d => {
     dailyTotals[d.date] = (dailyTotals[d.date] || 0) + d.ethanol
   })
 
@@ -201,13 +209,13 @@ const render = () => {
   const startOfYear = new Date(year, 0, 1)
 
   let ytdOz = 0
-  drinks.forEach(d => { if (d.date.startsWith(String(year))) ytdOz += d.ethanol })
+  drinks.forEach(d => { if (d.date.startsWith(String(year)) && !(excludeBirthday && d.birthday)) ytdOz += d.ethanol })
 
   const rangeOz = days => {
     const d = new Date(now)
     d.setDate(d.getDate() - days + 1)
     const min = toDateStr(d)
-    return drinks.reduce((sum, d) => d.date >= min && d.date <= todayStr ? sum + d.ethanol : sum, 0)
+    return drinks.reduce((sum, d) => d.date >= min && d.date <= todayStr && !(excludeBirthday && d.birthday) ? sum + d.ethanol : sum, 0)
   }
   $('oz-7d').textContent = rangeOz(7).toFixed(1) + ' oz'
   $('oz-30d').textContent = rangeOz(30).toFixed(1) + ' oz'
@@ -235,6 +243,27 @@ const render = () => {
   if (dailyAvg < 0.5) { pace.classList.add('pace-green'); ps.textContent = 'under pace' }
   else if (dailyAvg < 0.6) { pace.classList.add('pace-yellow'); ps.textContent = 'on pace' }
   else { pace.classList.add('pace-red'); ps.textContent = 'over pace' }
+
+  if (baselineAnnualOz > 0) {
+    const pct = rate => Math.round((1 - rate * 365 / baselineAnnualOz) * 100) + '%'
+    $('improvement-red').textContent = pct(0.6)
+    $('improvement-green').textContent = pct(0.4)
+  }
+
+  const monthLabels = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D']
+  const monthTotals = new Array(12).fill(0)
+  drinks.forEach(d => {
+    if (d.date.startsWith(String(year)) && !(excludeBirthday && d.birthday))
+      monthTotals[parseInt(d.date.slice(5, 7)) - 1] += d.ethanol
+  })
+  const mt = $('month-totals')
+  mt.replaceChildren()
+  monthLabels.slice(0, now.getMonth() + 1).forEach((label, i) => {
+    const cell = Object.assign(document.createElement('div'), { className: 'month-total' })
+    cell.appendChild(Object.assign(document.createElement('span'), { className: 'month-label', textContent: label }))
+    cell.appendChild(Object.assign(document.createElement('span'), { className: 'month-oz', textContent: monthTotals[i].toFixed(1) }))
+    mt.appendChild(cell)
+  })
 
   const drinkTypes = [
     { label: 'beers', ethanol: 1.2 },
@@ -274,20 +303,35 @@ const render = () => {
       col.appendChild(label)
       const stats = document.createElement('div')
       stats.className = 'row'
-      drinkTypes.forEach(d => {
-        const n = Math.floor(t.headroom / d.ethanol)
+      if (t.headroom === 0) {
+        const daysAway = Math.ceil(ytdOz / t.rate) - dayOfYear
         const stat = document.createElement('div')
         stat.className = 'stat fill'
         const val = document.createElement('div')
         val.className = 'stat-value'
-        val.textContent = n
+        val.textContent = daysAway
         const desc = document.createElement('div')
         desc.className = 'stat-label'
-        desc.textContent = d.label
+        desc.textContent = 'days away'
         stat.appendChild(val)
         stat.appendChild(desc)
         stats.appendChild(stat)
-      })
+      } else {
+        drinkTypes.forEach(d => {
+          const n = Math.floor(t.headroom / d.ethanol)
+          const stat = document.createElement('div')
+          stat.className = 'stat fill'
+          const val = document.createElement('div')
+          val.className = 'stat-value'
+          val.textContent = n
+          const desc = document.createElement('div')
+          desc.className = 'stat-label'
+          desc.textContent = d.label
+          stat.appendChild(val)
+          stat.appendChild(desc)
+          stats.appendChild(stat)
+        })
+      }
       col.appendChild(stats)
       grid.appendChild(col)
     })
@@ -307,7 +351,10 @@ const render = () => {
       const occasion = sorted.find(x => x.date === d.date && x.occasion)?.occasion
       const header = document.createElement('div')
       header.className = 'date-header'
-      header.textContent = new Date(d.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) + (occasion ? ` — ${occasion}` : '')
+      const dt = new Date(d.date + 'T00:00:00')
+      const smallDays = ['sᴜɴ', 'ᴍᴏɴ', 'ᴛᴜᴇ', 'ᴡᴇᴅ', 'ᴛʜᴜ', 'ꜰʀɪ', 'sᴀᴛ']
+      const monthDay = dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      header.textContent = smallDays[dt.getDay()] + ' ' + monthDay + (occasion ? ` — ${occasion}` : '')
       hist.appendChild(header)
     }
     const item = document.createElement('div')
@@ -380,6 +427,11 @@ document.querySelectorAll('#legend [data-pace]').forEach(el => {
   })
 })
 
+$('birthday-toggle').addEventListener('click', () => {
+  excludeBirthday = !excludeBirthday
+  $('birthday-toggle').setAttribute('aria-checked', excludeBirthday)
+  render()
+})
 $('sober-toggle').addEventListener('click', () => {
   soberOctober = !soberOctober
   $('sober-toggle').setAttribute('aria-checked', soberOctober)
