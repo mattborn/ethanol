@@ -296,7 +296,7 @@ const render = () => {
       const col = document.createElement('div')
       col.className = 'stack fill'
       const label = document.createElement('p')
-      label.appendChild(document.createTextNode(t.label))
+      label.appendChild(document.createTextNode(t.headroom === 0 ? t.label.replace('below', 'above') : t.label))
       const dot = document.createElement('span')
       dot.className = `outlook-dot ${t.dot}`
       label.appendChild(dot)
@@ -312,7 +312,7 @@ const render = () => {
         val.textContent = daysAway
         const desc = document.createElement('div')
         desc.className = 'stat-label'
-        desc.textContent = 'days away'
+        desc.textContent = 'days'
         stat.appendChild(val)
         stat.appendChild(desc)
         stats.appendChild(stat)
