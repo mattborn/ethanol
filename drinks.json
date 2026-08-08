@@ -131,5 +131,6 @@
   {"date":"2026-07-22","type":"Beer","oz":16,"abv":6.8,"occasion":"Slackwater w/ Ben, Joey & Josh","name":"Outer Range Sendy IPA"},
   {"date":"2026-07-24","type":"Beer","oz":16,"abv":7.5,"occasion":"Spencer & Ryan @ Localz Bistro","name":"Epic Utah Hip Check"},
   {"date":"2026-07-25","type":"Beer","oz":16,"abv":5,"occasion":"Hawaiian burgers @ Ryan’s","name":"Coors Banquet"},
-  {"date":"2026-07-25","type":"Beer","oz":16,"abv":5,"occasion":"Hawaiian burgers @ Ryan’s","name":"Coors Banquet"}
+  {"date":"2026-07-25","type":"Beer","oz":16,"abv":5,"occasion":"Hawaiian burgers @ Ryan’s","name":"Coors Banquet"},
+  {"date":"2026-08-02","type":"Beer","oz":16,"abv":11.3,"occasion":"Smith & Morehouse Reservoir","name":"Dr. Lupulin 3xIPA"}
 ]
