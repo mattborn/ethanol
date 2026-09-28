@@ -220,7 +220,7 @@ const render = () => {
   $('oz-7d').textContent = rangeOz(7).toFixed(1) + ' oz'
   $('oz-30d').textContent = rangeOz(30).toFixed(1) + ' oz'
   $('oz-60d').textContent = rangeOz(60).toFixed(1) + ' oz'
-  $('oz-ytd').textContent = ytdOz.toFixed(1) + ' oz'
+  $('oz-ytd').textContent = (ytdOz * 0.0295735).toFixed(2) + ' L'
 
   const soberDays = soberOctober ? 30 : 0
   const dayOfYear = Math.floor((now - startOfYear) / 86400000) + 1 + soberDays

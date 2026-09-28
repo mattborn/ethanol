@@ -143,5 +143,20 @@
   {"date":"2026-08-23","type":"Beer","oz":16,"abv":7.7,"occasion":"Oktoberfest @ Snowbird","name":"Weihenstephaner Vitus"},
   {"date":"2026-08-24","type":"Beer","oz":16,"abv":6.9,"occasion":"Jonny @ Joey’s","name":"Roadhouse Plasma Hazy IPA"},
   {"date":"2026-08-24","type":"Whiskey","oz":1,"abv":45.7,"occasion":"Jonny @ Joey’s","name":"Michters Bourbon"},
-  {"date":"2026-08-29","type":"Wine","oz":5,"abv":12,"occasion":"Meatloaf @ Ryan & Janna’s"}
+  {"date":"2026-08-29","type":"Wine","oz":5,"abv":12,"occasion":"Meatloaf @ Ryan & Janna’s"},
+  {"date":"2026-09-06","type":"Beer","oz":24,"abv":4.4,"occasion":"Brighton","name":"Modelo Especial"},
+  {"date":"2026-09-07","type":"Beer","oz":12,"abv":5,"occasion":"Don & Nays @ Ryan & Janna’s","name":"Coors Banquet"},
+  {"date":"2026-09-07","type":"Beer","oz":12,"abv":5,"occasion":"Don & Nays @ Ryan & Janna’s","name":"Coors Banquet"},
+  {"date":"2026-09-16","type":"Beer","oz":16,"abv":8,"occasion":"Level Crossing","name":"Cosmic Saunter Hazy DIPA"},
+  {"date":"2026-09-16","type":"Beer","oz":8,"abv":5,"occasion":"Level Crossing","name":"Flight"},
+  {"date":"2026-09-18","type":"Beer","oz":12,"abv":5,"name":"Koyote by Koyote Pale Ale"},
+  {"date":"2026-09-24","type":"Cocktail","oz":2.5,"abv":40,"occasion":"Pizza @ Hendrix","name":"Joey"},
+  {"date":"2026-09-24","type":"Cocktail","oz":2.5,"abv":40,"occasion":"Pizza @ Hendrix","name":"Joey"},
+  {"date":"2026-09-25","type":"Cocktail","oz":2.5,"abv":40,"occasion":"Happy hour","name":"Joey"},
+  {"date":"2026-09-26","type":"Beer","oz":12,"abv":5,"occasion":"RSL pre-game w/ Megan","name":"Coors Banquet"},
+  {"date":"2026-09-27","type":"Cocktail","oz":2.5,"abv":40,"occasion":"Risk @ Hendrix","name":"Joey"},
+  {"date":"2026-09-27","type":"Cocktail","oz":2.5,"abv":40,"occasion":"Risk @ Hendrix","name":"Joey"},
+  {"date":"2026-09-27","type":"Cocktail","oz":2.5,"abv":40,"occasion":"Sunday Night Football","name":"Joey"},
+  {"date":"2026-09-27","type":"Cocktail","oz":2.5,"abv":40,"occasion":"Sunday Night Football","name":"Joey"},
+  {"date":"2026-09-28","type":"Beer","oz":12,"abv":5,"occasion":"Bears game","name":"Coors Banquet"}
 ]
