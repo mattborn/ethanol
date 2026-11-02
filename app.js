@@ -9,7 +9,7 @@ let fixtureData = null
 let chart = null
 let currentRange = '60d'
 let excludeBirthday = false
-let soberOctober = false
+let soberMonth = false
 
 const getDrinks = () => {
   if (source === 'fixtures' && fixtureData) return fixtureData
@@ -222,7 +222,7 @@ const render = () => {
   $('oz-60d').textContent = rangeOz(60).toFixed(1) + ' oz'
   $('oz-ytd').textContent = (ytdOz * 0.0295735).toFixed(2) + ' L'
 
-  const soberDays = soberOctober ? 30 : 0
+  const soberDays = soberMonth ? 30 : 0
   const dayOfYear = Math.floor((now - startOfYear) / 86400000) + 1 + soberDays
   const daysInYear = (((year % 4 === 0 && year % 100 !== 0) || year % 400 === 0) ? 366 : 365) + soberDays
   const dailyAvg = dayOfYear > 0 ? ytdOz / dayOfYear : 0
@@ -344,11 +344,12 @@ const render = () => {
   const sorted = [...drinks].sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id)
   const hist = $('history')
   hist.replaceChildren()
-  let lastDate = ''
+  let lastKey = ''
   sorted.forEach(d => {
-    if (d.date !== lastDate) {
-      lastDate = d.date
-      const occasion = sorted.find(x => x.date === d.date && x.occasion)?.occasion
+    const key = `${d.date}|${d.occasion || ''}`
+    if (key !== lastKey) {
+      lastKey = key
+      const occasion = d.occasion
       const header = document.createElement('div')
       header.className = 'date-header'
       const dt = new Date(d.date + 'T00:00:00')
@@ -433,8 +434,8 @@ $('birthday-toggle').addEventListener('click', () => {
   render()
 })
 $('sober-toggle').addEventListener('click', () => {
-  soberOctober = !soberOctober
-  $('sober-toggle').setAttribute('aria-checked', soberOctober)
+  soberMonth = !soberMonth
+  $('sober-toggle').setAttribute('aria-checked', soberMonth)
   render()
 })
 $('add-wine').addEventListener('click', () => addDrink('Wine', defaults.wine.oz, defaults.wine.abv))
